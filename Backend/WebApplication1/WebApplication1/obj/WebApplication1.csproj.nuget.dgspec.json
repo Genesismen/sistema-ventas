@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\DOCUMENTOS\\SistemaVentas\\Backend\\WebApplication1\\WebApplication1\\WebApplication1.csproj": {}
+    "D:\\DOCUMENTOS\\SistemaVentas\\SistemaVentas-Equipo01\\Backend\\WebApplication1\\WebApplication1\\WebApplication1.csproj": {}
   },
   "projects": {
-    "D:\\DOCUMENTOS\\SistemaVentas\\Backend\\WebApplication1\\WebApplication1\\WebApplication1.csproj": {
+    "D:\\DOCUMENTOS\\SistemaVentas\\SistemaVentas-Equipo01\\Backend\\WebApplication1\\WebApplication1\\WebApplication1.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\DOCUMENTOS\\SistemaVentas\\Backend\\WebApplication1\\WebApplication1\\WebApplication1.csproj",
+        "projectUniqueName": "D:\\DOCUMENTOS\\SistemaVentas\\SistemaVentas-Equipo01\\Backend\\WebApplication1\\WebApplication1\\WebApplication1.csproj",
         "projectName": "WebApplication1",
-        "projectPath": "D:\\DOCUMENTOS\\SistemaVentas\\Backend\\WebApplication1\\WebApplication1\\WebApplication1.csproj",
+        "projectPath": "D:\\DOCUMENTOS\\SistemaVentas\\SistemaVentas-Equipo01\\Backend\\WebApplication1\\WebApplication1\\WebApplication1.csproj",
         "packagesPath": "C:\\Users\\DELL OPTIPLEX 9020\\.nuget\\packages\\",
-        "outputPath": "D:\\DOCUMENTOS\\SistemaVentas\\Backend\\WebApplication1\\WebApplication1\\obj\\",
+        "outputPath": "D:\\DOCUMENTOS\\SistemaVentas\\SistemaVentas-Equipo01\\Backend\\WebApplication1\\WebApplication1\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\DELL OPTIPLEX 9020\\AppData\\Roaming\\NuGet\\NuGet.Config",

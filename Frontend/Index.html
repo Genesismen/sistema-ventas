@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Ventas | Prototipo</title>
+<style>
+  :root{
+    --bg:#eef2f8; --card:#ffffff; --primary:#1f4e79; --primary-2:#2e6da4;
+    --accent:#f2a900; --text:#1b2430; --muted:#6b7a90; --border:#dde4ee;
+    --ok:#1e8e5a; --warn:#b8860b; --danger:#c0392b; --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+       background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+  /* Encabezado */
+  header.topbar{background:linear-gradient(135deg,var(--primary),var(--primary-2));
+       color:#fff;padding:18px 24px;display:flex;align-items:center;gap:14px;
+       box-shadow:0 2px 10px rgba(0,0,0,.15)}
+  .logo{width:46px;height:46px;border-radius:12px;background:var(--accent);color:#1b2430;
+       display:grid;place-items:center;font-weight:800;font-size:1.05rem}
+  header h1{font-size:1.2rem;letter-spacing:.3px}
+  header p{font-size:.78rem;opacity:.85}
+
+  /* Menú */
+  nav.menu{background:#fff;border-bottom:1px solid var(--border);padding:0 16px;
+       display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+  nav.menu button{background:none;border:none;padding:14px 18px;font-size:.93rem;font-weight:600;
+       color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:.2s}
+  nav.menu button:hover{color:var(--primary);background:#f5f8fc}
+  nav.menu button.activo{color:var(--primary);border-bottom-color:var(--accent)}
+
+  /* Layout */
+  main{flex:1;padding:24px;max-width:1150px;width:100%;margin:0 auto}
+  .vista{display:none;animation:fade .25s ease}
+  .vista.activa{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .titulo{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .titulo h2{font-size:1.25rem;color:var(--primary)}
+  .titulo span{font-size:.78rem;color:var(--muted)}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+        padding:18px;box-shadow:0 1px 3px rgba(20,40,70,.06)}
+  .card h3{font-size:1rem;margin-bottom:14px;color:var(--primary)}
+  .grid{display:grid;gap:16px}
+  .kpis{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .kpi small{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.7px}
+  .kpi b{display:block;font-size:1.6rem;color:var(--primary);margin-top:6px}
+  .dos-col{grid-template-columns:320px 1fr;align-items:start}
+  @media(max-width:820px){.dos-col{grid-template-columns:1fr}}
+
+  /* Formularios */
+  label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);
+        margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px}
+  input,select{width:100%;margin-top:5px;padding:9px 11px;border:1px solid var(--border);
+        border-radius:8px;font-size:.9rem;font-family:inherit;color:var(--text);background:#fbfcfe}
+  input:focus,select:focus{outline:none;border-color:var(--primary-2);background:#fff;
+        box-shadow:0 0 0 3px rgba(46,109,164,.12)}
+  .form-inline{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end}
+  .resumen{display:flex;gap:18px;flex-wrap:wrap;background:#f5f8fc;border:1px dashed var(--border);
+        border-radius:10px;padding:12px 16px;grid-column:1/-1}
+  .resumen div small{display:block;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .resumen div b{font-size:1.05rem;color:var(--primary)}
+  .resumen div b.total{color:var(--ok);font-size:1.25rem}
+  button.btn-primario{background:var(--primary);color:#fff;border:none;padding:11px 20px;
+        border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:.2s;grid-column:1/-1}
+  button.btn-primario:hover{background:var(--primary-2)}
+
+  /* Tablas */
+  .tabla-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+  table{width:100%;border-collapse:collapse;font-size:.87rem;background:#fff}
+  th{background:#f5f8fc;text-align:left;padding:11px 14px;font-size:.73rem;color:var(--muted);
+     text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);white-space:nowrap}
+  td{padding:11px 14px;border-bottom:1px solid #eef2f8;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#fafcff}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  code{background:#eef2f8;padding:2px 7px;border-radius:6px;font-size:.82rem;color:var(--primary)}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700}
+  .pill.ok{background:#e3f5ec;color:var(--ok)}
+  .pill.warn{background:#fdf3dd;color:var(--warn)}
+  .pill.danger{background:#fbe9e7;color:var(--danger)}
+  .pie-tabla{display:flex;justify-content:flex-end;gap:10px;padding:12px 4px 0;font-size:.9rem}
+  .pie-tabla b{color:var(--ok);font-size:1.1rem}
+
+  ul.lista{list-style:none}
+  ul.lista li{display:flex;justify-content:space-between;align-items:center;
+        padding:10px 0;border-bottom:1px solid #eef2f8;font-size:.88rem}
+  ul.lista li:last-child{border-bottom:none}
+
+  /* Aviso */
+  #aviso{position:fixed;bottom:22px;left:50%;transform:translate(-50%,120%);
+        padding:13px 22px;border-radius:10px;color:#fff;font-weight:600;font-size:.88rem;
+        box-shadow:0 8px 24px rgba(0,0,0,.25);transition:.35s;z-index:99}
+  #aviso.visible{transform:translate(-50%,0)}
+  #aviso.ok{background:var(--ok)}
+  #aviso.error{background:var(--danger)}
+
+  footer{background:var(--primary);color:#cfe0f5;text-align:center;padding:14px;
+        font-size:.78rem;margin-top:auto}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">SV</div>
+  <div>
+    <h1>Sistema de Ventas</h1>
+    <p>Ferretería El Tornillo · Prototipo demostrativo</p>
+  </div>
+</header>
+
+<nav class="menu">
+  <button class="activo" data-vista="inicio">Inicio</button>
+  <button data-vista="productos">Productos</button>
+  <button data-vista="clientes">Clientes</button>
+  <button data-vista="ventas">Ventas</button>
+  <button data-vista="historial">Historial</button>
+</nav>
+
+<main>
+
+  <!-- ================= INICIO ================= -->
+  <section id="inicio" class="vista activa">
+    <div class="titulo">
+      <h2>Panel de Inicio</h2>
+      <span>Resumen general del sistema</span>
+    </div>
+
+    <div class="grid kpis" style="margin-bottom:18px">
+      <div class="card kpi"><small>Productos registrados</small><b id="kpiProductos">0</b></div>
+      <div class="card kpi"><small>Clientes registrados</small><b id="kpiClientes">0</b></div>
+      <div class="card kpi"><small>Ventas del día</small><b id="kpiVentas">0</b></div>
+      <div class="card kpi"><small>Total facturado hoy</small><b id="kpiTotal">$0</b></div>
+    </div>
+
+    <div class="card">
+      <h3>Últimas ventas registradas</h3>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr><th>N° Venta</th><th>Fecha</th><th>Cliente</th><th>Total</th></tr>
+          </thead>
+          <tbody id="tablaUltimasVentas"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PRODUCTOS ================= -->
+  <section id="productos" class="vista">
+    <div class="titulo">
+      <h2>Módulo de Productos</h2>
+      <span>RF01 — Registrar y consultar productos</span>
+    </div>
+
+    <div class="grid dos-col">
+      <div class="card">
+        <h3>Registrar producto</h3>
+        <form id="formProducto">
+          <label>Código
+            <input type="text" id="prodCodigo" placeholder="Ej: 003" required>
+          </label>
+          <label>Producto
+            <input type="text" id="prodNombre" placeholder="Ej: Sierra circular" required>
+          </label>
+          <label>Precio (C$)
+            <input type="number" id="prodPrecio" min="0" step="0.01" placeholder="0.00" required>
+          </label>
+          <label>Stock
+            <input type="number" id="prodStock" min="0" placeholder="0" required>
+          </label>
+          <button type="submit" class="btn-primario">Guardar producto</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Listado de productos</h3>
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr><th>Código</th><th>Producto</th><th>Precio</th><th>Stock</th></tr>
+            </thead>
+            <tbody id="tablaProductos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CLIENTES ================= -->
+  <section id="clientes" class="vista">
+    <div class="titulo">
+      <h2>Módulo de Clientes</h2>
+      <span>RF02 — Registrar y consultar clientes</span>
+    </div>
+
+    <div class="grid dos-col">
+      <div class="card">
+        <h3>Registrar cliente</h3>
+        <form id="formCliente">
+          <label>Código
+            <input type="text" id="cliCodigo" placeholder="Ej: C03" required>
+          </label>
+          <label>Nombre completo
+            <input type="text" id="cliNombre" placeholder="Ej: Carlos Ruiz" required>
+          </label>
+          <label>Teléfono
+            <input type="text" id="cliTelefono" placeholder="Ej: 8888-3333" required>
+          </label>
+          <label>Correo
+            <input type="email" id="cliCorreo" placeholder="correo@mail.com" required>
+          </label>
+          <label>Dirección
+            <input type="text" id="cliDireccion" placeholder="Ej: Masaya" required>
+          </label>
+          <button type="submit" class="btn-primario">Guardar cliente</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Listado de clientes</h3>
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr><th>Código</th><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Dirección</th></tr>
+            </thead>
+            <tbody id="tablaClientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VENTAS ================= -->
+  <section id="ventas" class="vista">
+    <div class="titulo">
+      <h2>Módulo de Ventas</h2>
+      <span>RF03 y RF04 — Registrar ventas y calcular el total automáticamente</span>
+    </div>
+
+    <div class="card">
+      <h3>Nueva venta</h3>
+      <form id="formVenta" class="form-inline">
+        <label style="grid-column:1/-1">Cliente
+          <select id="ventaCliente" required></select>
+        </label>
+
+        <label>Producto
+          <select id="ventaProducto" required></select>
+        </label>
+        <label>Cantidad
+          <input type="number" id="ventaCantidad" min="1" value="1" required>
+        </label>
+        <label>Precio unitario
+          <input type="text" id="ventaPrecio" readonly>
+        </label>
+        <label>Subtotal
+          <input type="text" id="ventaSubtotal" readonly>
+        </label>
+
+        <button type="button" id="btnAgregar" class="btn-primario">Agregar a la venta</button>
+
+        <div class="resumen">
+          <div><small>Artículos</small><b id="resumenArticulos">0</b></div>
+          <div><small>Subtotal general</small><b id="resumenSubtotal">C$0.00</b></div>
+          <div><small>Total a pagar</small><b class="total" id="resumenTotal">C$0.00</b></div>
+        </div>
+
+        <button type="submit" class="btn-primario">Registrar venta</button>
+      </form>
+
+      <h3 style="margin-top:22px">Detalle de la venta actual</h3>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr>
+          </thead>
+          <tbody id="tablaDetalleVenta">
+            <tr><td colspan="4" style="text-align:center;color:var(--muted)">Sin artículos agregados</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HISTORIAL ================= -->
+  <section id="historial" class="vista">
+    <div class="titulo">
+      <h2>Historial de Ventas</h2>
+      <span>RF05 — Consultar el historial de ventas</span>
+    </div>
+
+    <div class="card">
+      <h3>Ventas registradas</h3>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr><th>N° Venta</th><th>Fecha</th><th>Cliente</th><th>Artículos</th><th>Total</th></tr>
+          </thead>
+          <tbody id="tablaHistorial"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>Prototipo demostrativo · Sistema de Ventas · Sin conexión a base de datos</footer>
+
+<div id="aviso"></div>
+
+<script>
+/* ============================================================
+   DATOS FICTICIOS
+   ============================================================ */
+const productos = [
+  { codigo:"001", nombre:"Taladro",  precio:2500, stock:8  },
+  { codigo:"002", nombre:"Martillo", precio:350,  stock:15 }
+];
+
+const clientes = [
+  { codigo:"C01", nombre:"Juan Pérez",  telefono:"8888-1111", correo:"juan@mail.com",  direccion:"Managua" },
+  { codigo:"C02", nombre:"María López", telefono:"7777-2222", correo:"maria@mail.com", direccion:"León"    }
+];
+
+const ventas = [
+  { numero:"V001", fecha:"2026-10-16", cliente:"Juan Pérez",  articulos:1, total:2500 },
+  { numero:"V002", fecha:"2026-10-15", cliente:"María López", articulos:1, total:350  }
+];
+
+let detalleVenta = [];   // artículos de la venta en curso
+let contadorVentas = 2;  // ya existen V001 y V002
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+const $ = (sel) => document.querySelector(sel);
+const money = (n) => "C$" + Number(n).toLocaleString("es-NI", {minimumFractionDigits:2, maximumFractionDigits:2});
+
+function aviso(msg, tipo="ok"){
+  const el = $("#aviso");
+  el.textContent = msg;
+  el.className = tipo + " visible";
+  setTimeout(() => el.className = tipo, 2200);
+}
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+document.querySelectorAll("nav.menu button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("nav.menu button").forEach(b => b.classList.remove("activo"));
+    document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
+    btn.classList.add("activo");
+    document.getElementById(btn.dataset.vista).classList.add("activa");
+  });
+});
+
+/* ============================================================
+   PRODUCTOS
+   ============================================================ */
+function renderProductos(){
+  const tbody = $("#tablaProductos");
+  tbody.innerHTML = productos.map(p => `
+    <tr>
+      <td><code>${p.codigo}</code></td>
+      <td>${p.nombre}</td>
+      <td class="num">${money(p.precio)}</td>
+      <td class="num">${p.stock}</td>
+    </tr>
+  `).join("");
+  $("#kpiProductos").textContent = productos.length;
+  llenarSelectProductos();
+}
+
+$("#formProducto").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const nuevo = {
+    codigo: $("#prodCodigo").value.trim(),
+    nombre: $("#prodNombre").value.trim(),
+    precio: parseFloat($("#prodPrecio").value),
+    stock: parseInt($("#prodStock").value)
+  };
+  if (productos.some(p => p.codigo === nuevo.codigo)) {
+    aviso("Ese código ya existe", "error"); return;
+  }
+  productos.push(nuevo);
+  renderProductos();
+  e.target.reset();
+  aviso("Producto registrado correctamente");
+});
+
+/* ============================================================
+   CLIENTES
+   ============================================================ */
+function renderClientes(){
+  const tbody = $("#tablaClientes");
+  tbody.innerHTML = clientes.map(c => `
+    <tr>
+      <td><code>${c.codigo}</code></td>
+      <td>${c.nombre}</td>
+      <td>${c.telefono}</td>
+      <td>${c.correo}</td>
+      <td>${c.direccion}</td>
+    </tr>
+  `).join("");
+  $("#kpiClientes").textContent = clientes.length;
+  llenarSelectClientes();
+}
+
+$("#formCliente").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const nuevo = {
+    codigo: $("#cliCodigo").value.trim(),
+    nombre: $("#cliNombre").value.trim(),
+    telefono: $("#cliTelefono").value.trim(),
+    correo: $("#cliCorreo").value.trim(),
+    direccion: $("#cliDireccion").value.trim()
+  };
+  if (clientes.some(c => c.codigo === nuevo.codigo)) {
+    aviso("Ese código de cliente ya existe", "error"); return;
+  }
+  clientes.push(nuevo);
+  renderClientes();
+  e.target.reset();
+  aviso("Cliente registrado correctamente");
+});
+
+/* ============================================================
+   SELECTS DINÁMICOS
+   ============================================================ */
+function llenarSelectProductos(){
+  const sel = $("#ventaProducto");
+  sel.innerHTML = '<option value="">-- Seleccione producto --</option>' +
+    productos.map(p => `<option value="${p.codigo}">${p.nombre} (${money(p.precio)})</option>`).join("");
+}
+
+function llenarSelectClientes(){
+  const sel = $("#ventaCliente");
+  sel.innerHTML = '<option value="">-- Seleccione cliente --</option>' +
+    clientes.map(c => `<option value="${c.codigo}">${c.nombre}</option>`).join("");
+}
+
+/* ============================================================
+   VENTAS
+   ============================================================ */
+$("#ventaProducto").addEventListener("change", () => {
+  const cod = $("#ventaProducto").value;
+  const prod = productos.find(p => p.codigo === cod);
+  if (prod) {
+    $("#ventaPrecio").value = money(prod.precio);
+    calcularSubtotalLinea();
+  } else {
+    $("#ventaPrecio").value = "";
+    $("#ventaSubtotal").value = "";
+  }
+});
+
+$("#ventaCantidad").addEventListener("input", calcularSubtotalLinea);
+
+function calcularSubtotalLinea(){
+  const cod = $("#ventaProducto").value;
+  const prod = productos.find(p => p.codigo === cod);
+  const cant = parseInt($("#ventaCantidad").value) || 0;
+  if (prod && cant > 0) {
+    $("#ventaSubtotal").value = money(prod.precio * cant);
+  } else {
+    $("#ventaSubtotal").value = "";
+  }
+}
+
+$("#btnAgregar").addEventListener("click", () => {
+  const cod = $("#ventaProducto").value;
+  const cant = parseInt($("#ventaCantidad").value);
+  const prod = productos.find(p => p.codigo === cod);
+
+  if (!prod) { aviso("Seleccione un producto", "error"); return; }
+  if (!cant || cant < 1) { aviso("Ingrese una cantidad válida", "error"); return; }
+  if (cant > prod.stock) { aviso("Stock insuficiente. Disponible: " + prod.stock, "error"); return; }
+
+  detalleVenta.push({
+    codigo: prod.codigo,
+    nombre: prod.nombre,
+    cantidad: cant,
+    precio: prod.precio,
+    subtotal: prod.precio * cant
+  });
+
+  renderDetalleVenta();
+  $("#ventaProducto").value = "";
+  $("#ventaCantidad").value = 1;
+  $("#ventaPrecio").value = "";
+  $("#ventaSubtotal").value = "";
+  aviso("Artículo agregado");
+});
+
+function renderDetalleVenta(){
+  const tbody = $("#tablaDetalleVenta");
+  if (detalleVenta.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">Sin artículos agregados</td></tr>';
+  } else {
+    tbody.innerHTML = detalleVenta.map(d => `
+      <tr>
+        <td>${d.nombre}</td>
+        <td class="num">${d.cantidad}</td>
+        <td class="num">${money(d.precio)}</td>
+        <td class="num">${money(d.subtotal)}</td>
+      </tr>
+    `).join("");
+  }
+
+  const totalArticulos = detalleVenta.reduce((s, d) => s + d.cantidad, 0);
+  const subtotal = detalleVenta.reduce((s, d) => s + d.subtotal, 0);
+
+  $("#resumenArticulos").textContent = totalArticulos;
+  $("#resumenSubtotal").textContent = money(subtotal);
+  $("#resumenTotal").textContent = money(subtotal);
+}
+
+$("#formVenta").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const codCliente = $("#ventaCliente").value;
+  const cli = clientes.find(c => c.codigo === codCliente);
+
+  if (!cli) { aviso("Seleccione un cliente", "error"); return; }
+  if (detalleVenta.length === 0) { aviso("Agregue al menos un artículo", "error"); return; }
+
+  // Descontar stock
+  detalleVenta.forEach(d => {
+    const prod = productos.find(p => p.codigo === d.codigo);
+    if (prod) prod.stock -= d.cantidad;
+  });
+
+  const total = detalleVenta.reduce((s, d) => s + d.subtotal, 0);
+  contadorVentas++;
+  const numero = "V" + String(contadorVentas).padStart(3, "0");
+
+  ventas.push({
+    numero,
+    fecha: new Date().toISOString().slice(0,10),
+    cliente: cli.nombre,
+    articulos: detalleVenta.reduce((s, d) => s + d.cantidad, 0),
+    total
+  });
+
+  detalleVenta = [];
+  renderDetalleVenta();
+  renderProductos();
+  renderHistorial();
+  renderInicio();
+  e.target.reset();
+  aviso("Venta " + numero + " registrada correctamente");
+});
+
+/* ============================================================
+   HISTORIAL
+   ============================================================ */
+function renderHistorial(){
+  const tbody = $("#tablaHistorial");
+  tbody.innerHTML = ventas.map(v => `
+    <tr>
+      <td><code>${v.numero}</code></td>
+      <td>${v.fecha}</td>
+      <td>${v.cliente}</td>
+      <td class="num">${v.articulos}</td>
+      <td class="num"><b>${money(v.total)}</b></td>
+    </tr>
+  `).join("") || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Sin ventas registradas</td></tr>';
+}
+
+/* ============================================================
+   INICIO
+   ============================================================ */
+function renderInicio(){
+  $("#kpiVentas").textContent = ventas.length;
+  const total = ventas.reduce((s, v) => s + v.total, 0);
+  $("#kpiTotal").textContent = money(total);
+
+  const ultimas = ventas.slice(-3).reverse();
+  $("#tablaUltimasVentas").innerHTML = ultimas.map(v => `
+    <tr>
+      <td><code>${v.numero}</code></td>
+      <td>${v.fecha}</td>
+      <td>${v.cliente}</td>
+      <td class="num"><b>${money(v.total)}</b></td>
+    </tr>
+  `).join("");
+}
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
+renderProductos();
+renderClientes();
+renderDetalleVenta();
+renderHistorial();
+renderInicio();
+</script>
+
+</body>
+</html>
